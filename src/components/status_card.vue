@@ -53,8 +53,7 @@ export default {
   methods: {
     async getStatus() {
       try {
-        let port = window.location.port
-        let url = `http://127.0.0.1:${port}/status`
+        let url = `/status`
         const response = await axios.get(url)
         if (response.status === 200) {
           let data = response.data

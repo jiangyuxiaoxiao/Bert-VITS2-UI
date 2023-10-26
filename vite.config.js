@@ -27,6 +27,10 @@ export default defineConfig({
         target: 'http://127.0.0.1:14011',
         changeOrigin: true,
       },
+      '/tools': {
+        target: 'http://127.0.0.1:14011',
+        changeOrigin: true,
+      },
     },
   }
 })

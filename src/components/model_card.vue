@@ -1,10 +1,33 @@
 <script>
+import axios from "axios";
+
 export default {
   name: "model_card",
 
   props: ["name", "speakers", "model"],
   mounted() {
     this.speaker_name = this.speakers[0]
+  },
+
+  methods: {
+    async delete_model() {
+      let url = `/models/delete`
+      console.log(this.model)
+      let params = {
+        model_id: parseInt(this.model.id)
+      }
+      try {
+        await axios.get(url, {params: params})
+      } catch (error) {
+        console.error("模型卸载失败", error)
+      }
+    },
+
+    getName(text, name) {
+      let name2 = name.replace(/^Data\\|^Data\//, '').replace(/models\\|models\//, '')
+      let text2 = text.substring(0,10)
+      return text2 + "@" + name2
+    }
   }
 }
 
@@ -13,7 +36,7 @@ export default {
 <template>
   <a-card :title="this.name + '@' + model.device">
     <template #extra>
-        <a-checkbox v-model:checked="model.selected">选择模型</a-checkbox>
+      <a-checkbox v-model:checked="model.selected">选择模型</a-checkbox>
     </template>
     <a-row justify="start" align="middle" :gutter="[8,8]" :wrap="true">
       <h4>说话人</h4>
@@ -42,7 +65,7 @@ export default {
         </a-select>
       </a-col>
       <a-col :offset="4">
-        <a-button>卸载</a-button>
+        <a-button @click="delete_model">卸载</a-button>
       </a-col>
 
 
@@ -107,9 +130,15 @@ export default {
       </a-col>
 
       <!-- 音频相关 -->
-      <a-space v-show="model.audio.valid">
+      <a-col :span = "24" v-show="model.audio.loading">
+        <a-spin />
+      </a-col>
+
+      <a-space v-show="model.audio.valid" size="large">
         <audio :src="model.audio.data.src" controls></audio>
-        <a-button>下载音频</a-button>
+        <a-button :href="model.audio.data.src"
+                  :download="getName(model.audio.data.texts, model.name)">下载音频
+        </a-button>
       </a-space>
 
 
