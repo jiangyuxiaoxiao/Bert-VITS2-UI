@@ -131,6 +131,7 @@ export default {
       </a-col>
       <a-col :span="20">
         <a-progress
+            status="normal"
             :stroke-color="status.cpu.color"
             :percent="status.cpu.percent.toFixed(2)"/>
       </a-col>
@@ -141,6 +142,7 @@ export default {
       </a-col>
       <a-col :span="20">
         <a-progress
+            status="normal"
             :stroke-color="status.cpu.memory.color"
             :percent="(status.cpu.memory.used * 100 / status.cpu.memory.total).toFixed(2)"/>
       </a-col>
@@ -151,6 +153,7 @@ export default {
       </a-col>
       <a-col :span="20">
         <a-progress
+            status="normal"
             :stroke-color="gpu.color"
             :percent="gpu.percent.toFixed(2)"/>
       </a-col>
@@ -159,6 +162,7 @@ export default {
       </a-col>
       <a-col :span="20">
         <a-progress
+            status="normal"
             :stroke-color="gpu.memory.color"
             :percent="(gpu.memory.used * 100 / gpu.memory.total).toFixed(2)"/>
       </a-col>

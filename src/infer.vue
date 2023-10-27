@@ -8,6 +8,28 @@ import axios from "axios";
 
 let registered_model = ref(new Set())
 let models = ref({})
+let global_sdp_ratio = ref(0.2)
+let global_sdp_ratio_selected = ref(false)
+let global_noise = ref(0.2)
+let global_noise_selected = ref(false)
+let global_noisew = ref(0.9)
+let global_noisew_selected = ref(false)
+let global_length = ref(1.0)
+let global_length_selected = ref(false)
+let global_speaker = ref("")
+let global_speaker_selected = ref(false)
+let global_language = ref("")
+let global_language_selected = ref(false)
+let select_all_choices = ref({
+  status: false,
+  type: "primary",
+  text: "选项全选"
+})
+let select_all_models = ref({
+  status: false,
+  type: "primary",
+  text: "模型全选"
+})
 const texts = ref("")
 export default {
   name: "infer",
@@ -17,6 +39,20 @@ export default {
       colorTable: colorTable,
       models: models,
       texts: texts,
+      global_sdp_ratio: global_sdp_ratio,
+      global_sdp_ratio_selected: global_sdp_ratio_selected,
+      global_noise: global_noise,
+      global_noise_selected: global_noise_selected,
+      global_noisew: global_noisew,
+      global_noisew_selected: global_noisew_selected,
+      global_length: global_length,
+      global_length_selected: global_length_selected,
+      global_speaker: global_speaker,
+      global_speaker_selected: global_speaker_selected,
+      global_language: global_language,
+      global_language_selected: global_language_selected,
+      select_all_models: select_all_models,
+      select_all_choices: select_all_choices
     }
   },
   mounted() {
@@ -62,7 +98,7 @@ export default {
                   loading: false,
                   valid: false,
                   data: {
-                    texts : "",
+                    texts: "",
                     src: ""
                   }
                 }
@@ -71,10 +107,8 @@ export default {
             }
           }
           for (let model_id of registered_model.value) {
-            console.log(model_id)
             // 删除不存在的模型
             if (!loaded_model.has(model_id)) {
-              console.log(model_id)
               registered_model.value.delete(model_id)
               delete models.value[model_id]
             }
@@ -112,7 +146,7 @@ export default {
           model.audio.data.src = URL.createObjectURL(data)
           model.audio.valid = true
           model.audio.data.texts = texts
-        }else{
+        } else {
           model.audio.loading = false
         }
       } catch (error) {
@@ -149,6 +183,105 @@ export default {
       } catch (error) {
         console.error("翻译失败", error)
       }
+    },
+
+    all_choices_button() {
+      if (select_all_choices.value.status === false) {
+        select_all_choices.value.status = true
+        select_all_choices.value.type = "default"
+        select_all_choices.value.text = "取消选项全选"
+        global_sdp_ratio_selected.value = true
+        global_noise_selected.value = true
+        global_noisew_selected.value = true
+        global_length_selected.value = true
+        global_speaker_selected.value = true
+        global_language_selected.value = true
+      } else {
+        select_all_choices.value.status = false
+        select_all_choices.value.type = "primary"
+        select_all_choices.value.text = "选项全选"
+        global_sdp_ratio_selected.value = false
+        global_noise_selected.value = false
+        global_noisew_selected.value = false
+        global_length_selected.value = false
+        global_speaker_selected.value = false
+        global_language_selected.value = false
+      }
+    },
+
+    all_models_button() {
+      if (select_all_models.value.status === false) {
+        select_all_models.value.status = true
+        select_all_models.value.type = "default"
+        select_all_models.value.text = "取消模型全选"
+        for (let model_id in models.value) {
+          models.value[model_id].selected = true
+        }
+      } else {
+        select_all_models.value.status = false
+        select_all_models.value.type = "primary"
+        select_all_models.value.text = "模型全选"
+        for (let model_id in models.value) {
+          models.value[model_id].selected = false
+        }
+      }
+    },
+
+    async delete_selected_models() {
+      // 卸载所有选中模型
+      let url = `/models/delete`
+      for (let model_id in models.value) {
+        if (models.value[model_id].selected === true) {
+          let params = {
+            model_id: parseInt(models.value[model_id].id)
+          }
+          try {
+            await axios.get(url, {params: params})
+          } catch (error) {
+            console.error(`模型${models.value[model_id].name}卸载失败`, error)
+          }
+        }
+      }
+    },
+
+    apply_global_setting() {
+      for (let model_id in models.value) {
+        if (models.value[model_id].selected === true) {
+          if(global_sdp_ratio_selected.value === true){
+            models.value[model_id].sdp_ratio = global_sdp_ratio.value
+          }
+          if(global_noise_selected.value === true){
+            models.value[model_id].noise = global_noise.value
+          }
+          if(global_noisew_selected.value === true){
+            models.value[model_id].noisew = global_noisew.value
+          }
+          if(global_length_selected.value === true){
+            models.value[model_id].length = global_length.value
+          }
+          if(global_speaker_selected.value === true){
+            if(models.value[model_id].speakers.includes(global_speaker.value)){
+              models.value[model_id].speaker_name = global_speaker.value
+            }
+          }
+          if(global_language_selected.value === true){
+            models.value[model_id].language = global_language.value
+          }
+        }
+      }
+    }
+  },
+  computed: {
+    allSpeakers() {
+      let Speakers = new Set()
+      for (let index in models.value) {
+        for (let spk of models.value[index].speakers) {
+          if (!Speakers.has(spk)) {
+            Speakers.add(spk)
+          }
+        }
+      }
+      return Speakers
     }
   }
 }
@@ -167,7 +300,7 @@ export default {
         <a-col :span="24">
           <a-card title="输入文本内容">
             <a-row justify="start" :gutter="[16,16]">
-              <a-textarea v-model:value="texts" placeholder="请输入文本" :rows="6"/>
+              <a-textarea v-model:value="texts" placeholder="请输入文本" :rows="7"/>
               <a-space>
                 <a-button @click="translate('jp')"> 翻译日语</a-button>
                 <a-button @click="translate('en')"> 翻译英语</a-button>
@@ -186,9 +319,136 @@ export default {
     <a-divider :style="{'background-color':colorTable[5], 'height':'2px'} "/>
     -->
     <a-col :span="12">
-      <a-card title="通用面板">
-      </a-card>
-      <select_model></select_model>
+      <a-row justify="start" :gutter="[16,16]" align="bottom">
+        <a-col :span="24">
+          <select_model></select_model>
+        </a-col>
+        <a-col :span="24">
+          <a-card title="全局设置">
+            <a-row align="middle" justify="start" wrap="true">
+              <!-- 参数相关 -->
+              <a-col :span="3">
+                <a-checkbox v-model:checked="global_sdp_ratio_selected">sdp_ratio</a-checkbox>
+              </a-col>
+              <a-col :span="16">
+                <a-slider v-model:value="global_sdp_ratio" :min="0" :max="1" :step="0.1" style="color: #a0c4ff"/>
+              </a-col>
+              <a-col :span="5">
+                <a-input-number
+                    v-model:value="global_sdp_ratio"
+                    :min="0"
+                    :max="1"
+                    :step="0.1"
+                    style="margin-left: 16px"
+                />
+              </a-col>
+
+
+              <a-col :span="3">
+                <a-checkbox v-model:checked="global_noise_selected">noise</a-checkbox>
+              </a-col>
+              <a-col :span="16">
+                <a-slider v-model:value="global_noise" :min="0.1" :max="2" :step="0.1"/>
+              </a-col>
+              <a-col :span="5">
+                <a-input-number
+                    v-model:value="global_noise"
+                    :min="0.1"
+                    :max="2"
+                    :step="0.1"
+                    style="margin-left: 16px"
+                />
+              </a-col>
+
+              <a-col :span="3">
+                <a-checkbox v-model:checked="global_noisew_selected">noisew</a-checkbox>
+              </a-col>
+              <a-col :span="16">
+                <a-slider v-model:value="global_noisew" :min="0.1" :max="2" :step="0.1"/>
+              </a-col>
+              <a-col :span="5">
+                <a-input-number
+                    v-model:value="global_noisew"
+                    :min="0.1"
+                    :max="2"
+                    :step="0.1"
+                    style="margin-left: 16px"
+                />
+              </a-col>
+
+              <a-col :span="3">
+                <a-checkbox v-model:checked="global_length_selected">length</a-checkbox>
+              </a-col>
+              <a-col :span="16">
+                <a-slider v-model:value="global_length" :min="0.1" :max="2" :step="0.1"/>
+              </a-col>
+              <a-col :span="5">
+                <a-input-number
+                    v-model:value="global_length"
+                    :min="0.1"
+                    :max="2"
+                    :step="0.1"
+                    style="margin-left: 16px"
+                />
+              </a-col>
+              <a-divider></a-divider>
+
+              <!-- 角色相关 -->
+              <a-col :span="24">
+                <a-space size="large" class="site-space-compact-wrapper">
+                  <a-space size="small">
+                    <a-checkbox v-model:checked="global_speaker_selected">说话人</a-checkbox>
+                    <a-select
+                        ref="select"
+                        v-model:value="global_speaker"
+                        style="width: 10em"
+                        @focus="focus"
+                    >
+                      <a-select-option v-for="spk in allSpeakers" :value="spk"></a-select-option>
+                    </a-select>
+                  </a-space>
+                  <a-space size="small">
+                    <a-checkbox v-model:checked="global_language_selected">语言</a-checkbox>
+                    <a-select
+                        ref="select"
+                        v-model:value="global_language"
+                        style="width: 10em"
+                        @focus="focus"
+                    >
+                      <a-select-option value="ZH"></a-select-option>
+                      <a-select-option value="JP"></a-select-option>
+                      <a-select-option value="EN"></a-select-option>
+                    </a-select>
+                  </a-space>
+                </a-space>
+              </a-col>
+              <a-col :span="24"></a-col>
+              <a-divider></a-divider>
+
+              <a-col>
+                <a-button @click="all_choices_button"
+                          :type="select_all_choices.type">{{ select_all_choices.text }}
+                </a-button>
+              </a-col>
+              <a-col :offset="1">
+                <a-button @click="all_models_button"
+                          :type="select_all_models.type">{{ select_all_models.text }}
+                </a-button>
+              </a-col>
+              <a-col :offset="1">
+                <a-button @click="delete_selected_models">卸载选中模型</a-button>
+              </a-col>
+              <a-col :offset="1">
+                <a-button @click="apply_global_setting">应用全局设置</a-button>
+              </a-col>
+
+            </a-row>
+
+          </a-card>
+        </a-col>
+
+
+      </a-row>
     </a-col>
 
 

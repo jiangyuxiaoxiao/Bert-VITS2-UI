@@ -12,7 +12,6 @@ export default {
   methods: {
     async delete_model() {
       let url = `/models/delete`
-      console.log(this.model)
       let params = {
         model_id: parseInt(this.model.id)
       }
@@ -26,7 +25,7 @@ export default {
     getName(text, name) {
       let name2 = name.replace(/^Data\\|^Data\//, '').replace(/models\\|models\//, '')
       let text2 = text.substring(0,10)
-      return text2 + "@" + name2
+      return text2 + "@" + name2 + ".wav"
     }
   }
 }
@@ -36,9 +35,9 @@ export default {
 <template>
   <a-card :title="this.name + '@' + model.device">
     <template #extra>
-      <a-checkbox v-model:checked="model.selected">选择模型</a-checkbox>
+      <a-switch v-model:checked="model.selected"></a-switch>
     </template>
-    <a-row justify="start" align="middle" :gutter="[8,8]" :wrap="true">
+    <a-row justify="start" align="bottom" :gutter="[8,8]" :wrap="true">
       <h4>说话人</h4>
       <a-col style="margin-left: 1em" :span="6">
         <a-select
