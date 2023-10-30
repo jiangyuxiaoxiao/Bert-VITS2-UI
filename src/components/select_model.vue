@@ -4,11 +4,13 @@ import {ref, watch} from 'vue';
 import {TreeSelect} from 'ant-design-vue';
 
 const SHOW_PARENT = TreeSelect.SHOW_PARENT;
-let treeData = ref([])
-let selected_models = ref([])
-let language = ref("ZH")
-let devices = ref([])
-let device = ref("")
+const model_loading = ref(false)
+const treeData = ref([])
+const selected_models = ref([])
+const language = ref("ZH")
+const devices = ref([])
+const device = ref("")
+const rootDir = ref("Data")
 watch(selected_models, () => {
   console.log(selected_models.value);
 });
@@ -17,11 +19,13 @@ watch(selected_models, () => {
 export default {
   data() {
     return {
+      model_loading: model_loading,
       treeData: treeData,
       selected_models: selected_models,
       language: language,
       device: device,
-      devices: devices
+      devices: devices,
+      rootDir: rootDir
     }
   },
   name: "Select_Model",
@@ -32,9 +36,11 @@ export default {
   methods: {
     async get_local_models() {
       let url = `/models/get_local`
+      let params = {"root_dir": rootDir.value}
       try {
         const response = await axios.get(url, {
-          timeout: 3000
+          timeout: 3000,
+          params: params
         })
         console.log(response)
         if (response.status === 200) {
@@ -52,7 +58,7 @@ export default {
             for (let i = 0; i < data[dataset_name].length; i++) {
               dataset_node.children.push({
                 label: `${dataset_name}/${data[dataset_name][i]}`,
-                value: `Data/${dataset_name}/${data[dataset_name][i]}`
+                value: `${rootDir.value}/${dataset_name}/${data[dataset_name][i]}`
               })
             }
             result.push(dataset_node)
@@ -106,10 +112,14 @@ export default {
     },
 
     async load_all_models() {
+      model_loading.value = true
+      let models = selected_models.value
+      selected_models.value = []
       // 加载所有选中的模型
-      for (let index in selected_models.value) {
-        await this.load_model(selected_models.value[index], device.value, language.value)
+      for (let index in models) {
+        await this.load_model(models[index], device.value, language.value)
       }
+      model_loading.value = false
     }
   }
 }
@@ -117,7 +127,14 @@ export default {
 
 <template>
   <a-card title="模型加载" :bordered="false">
-    <a-row :gutter="10">
+    <a-row :gutter="[10,10]">
+      <a-col :span="24">
+        <a-space-compact block>
+          <a-radio-button :style="{ width: '35%' }" disabled>搜索根目录</a-radio-button>
+          <a-input v-model:value="rootDir" placeholder="不建议自设根目录，最好使用默认配置"/>
+        </a-space-compact>
+
+      </a-col>
       <a-col :span="18">
         <a-tree-select
             v-model:value="selected_models"
@@ -155,7 +172,7 @@ export default {
         </a-select>
       </a-col>
       <a-col :span="2">
-        <a-button type="primary" @click="load_all_models">加载模型</a-button>
+        <a-button type="primary" @click="load_all_models" :loading="model_loading">加载模型</a-button>
       </a-col>
     </a-row>
   </a-card>

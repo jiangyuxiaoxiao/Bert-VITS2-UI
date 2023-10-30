@@ -1,5 +1,6 @@
 <script>
 import axios from "axios";
+import { DownloadOutlined } from '@ant-design/icons-vue';
 
 export default {
   name: "model_card",
@@ -7,6 +8,9 @@ export default {
   props: ["name", "speakers", "model"],
   mounted() {
     this.speaker_name = this.speakers[0]
+  },
+  components:{
+    DownloadOutlined
   },
 
   methods: {
@@ -136,7 +140,11 @@ export default {
       <a-space v-show="model.audio.valid" size="large">
         <audio :src="model.audio.data.src" controls></audio>
         <a-button :href="model.audio.data.src"
-                  :download="getName(model.audio.data.texts, model.name)">下载音频
+                  :download="getName(model.audio.data.texts, model.name)">
+          <template #icon>
+            <DownloadOutlined/>
+          </template>
+          下载音频
         </a-button>
       </a-space>
 

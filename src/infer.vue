@@ -5,27 +5,30 @@ import model_card from "@/components/model_card.vue";
 import colorTable from "@/color";
 import {ref} from "vue";
 import axios from "axios";
+import {CheckOutlined, CloseOutlined} from "@ant-design/icons-vue";
 
-let registered_model = ref(new Set())
-let models = ref({})
-let global_sdp_ratio = ref(0.2)
-let global_sdp_ratio_selected = ref(false)
-let global_noise = ref(0.2)
-let global_noise_selected = ref(false)
-let global_noisew = ref(0.9)
-let global_noisew_selected = ref(false)
-let global_length = ref(1.0)
-let global_length_selected = ref(false)
-let global_speaker = ref("")
-let global_speaker_selected = ref(false)
-let global_language = ref("")
-let global_language_selected = ref(false)
-let select_all_choices = ref({
+const generate_audio_loading = ref(false)
+const delete_model_loading = ref(false)
+const registered_model = ref(new Set())
+const models = ref({})
+const global_sdp_ratio = ref(0.2)
+const global_sdp_ratio_selected = ref(false)
+const global_noise = ref(0.2)
+const global_noise_selected = ref(false)
+const global_noisew = ref(0.9)
+const global_noisew_selected = ref(false)
+const global_length = ref(1.0)
+const global_length_selected = ref(false)
+const global_speaker = ref("")
+const global_speaker_selected = ref(false)
+const global_language = ref("")
+const global_language_selected = ref(false)
+const select_all_choices = ref({
   status: false,
   type: "primary",
   text: "选项全选"
 })
-let select_all_models = ref({
+const select_all_models = ref({
   status: false,
   type: "primary",
   text: "模型全选"
@@ -33,9 +36,11 @@ let select_all_models = ref({
 const texts = ref("")
 export default {
   name: "infer",
-  components: {model_card, status_card, select_model},
+  components: {model_card, status_card, select_model, CheckOutlined, CloseOutlined},
   data() {
     return {
+      generate_audio_loading: generate_audio_loading,
+      delete_model_loading:delete_model_loading,
       colorTable: colorTable,
       models: models,
       texts: texts,
@@ -158,6 +163,7 @@ export default {
     async infers() {
       // 推理所有选中模型
       console.info(texts.value)
+      generate_audio_loading.value = true
       for (let id in models.value) {
         // 消除上次的音频
         models.value[id].audio.valid = false
@@ -165,6 +171,7 @@ export default {
           await this.infer_audio(texts.value, models.value[id])
         }
       }
+      generate_audio_loading.value = false
     },
 
     async translate(to_language) {
@@ -230,6 +237,7 @@ export default {
     async delete_selected_models() {
       // 卸载所有选中模型
       let url = `/models/delete`
+      delete_model_loading.value = true
       for (let model_id in models.value) {
         if (models.value[model_id].selected === true) {
           let params = {
@@ -242,29 +250,30 @@ export default {
           }
         }
       }
+      delete_model_loading.value = false
     },
 
     apply_global_setting() {
       for (let model_id in models.value) {
         if (models.value[model_id].selected === true) {
-          if(global_sdp_ratio_selected.value === true){
+          if (global_sdp_ratio_selected.value === true) {
             models.value[model_id].sdp_ratio = global_sdp_ratio.value
           }
-          if(global_noise_selected.value === true){
+          if (global_noise_selected.value === true) {
             models.value[model_id].noise = global_noise.value
           }
-          if(global_noisew_selected.value === true){
+          if (global_noisew_selected.value === true) {
             models.value[model_id].noisew = global_noisew.value
           }
-          if(global_length_selected.value === true){
+          if (global_length_selected.value === true) {
             models.value[model_id].length = global_length.value
           }
-          if(global_speaker_selected.value === true){
-            if(models.value[model_id].speakers.includes(global_speaker.value)){
+          if (global_speaker_selected.value === true) {
+            if (models.value[model_id].speakers.includes(global_speaker.value)) {
               models.value[model_id].speaker_name = global_speaker.value
             }
           }
-          if(global_language_selected.value === true){
+          if (global_language_selected.value === true) {
             models.value[model_id].language = global_language.value
           }
         }
@@ -304,9 +313,9 @@ export default {
               <a-space>
                 <a-button @click="translate('jp')"> 翻译日语</a-button>
                 <a-button @click="translate('en')"> 翻译英语</a-button>
-                <a-button> 快速切分</a-button>
-                <a-button type="primary" @click="infers"> 生成音频</a-button>
-                <a-button type="primary"> 切分生成音频</a-button>
+                <a-button v-show="false"> 快速切分</a-button>
+                <a-button type="primary" @click="infers" :loading="generate_audio_loading"> 生成音频</a-button>
+                <a-button v-show="false" type="primary"> 切分生成音频</a-button>
               </a-space>
             </a-row>
           </a-card>
@@ -436,7 +445,7 @@ export default {
                 </a-button>
               </a-col>
               <a-col :offset="1">
-                <a-button @click="delete_selected_models">卸载选中模型</a-button>
+                <a-button @click="delete_selected_models" :loading="delete_model_loading">卸载选中模型</a-button>
               </a-col>
               <a-col :offset="1">
                 <a-button @click="apply_global_setting">应用全局设置</a-button>

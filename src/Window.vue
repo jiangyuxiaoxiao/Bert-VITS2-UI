@@ -44,7 +44,6 @@
 import {ref} from 'vue';
 import {defineComponent} from "vue";
 import infer from "@/infer.vue";
-import {SettingFilled} from "@ant-design/icons-vue";
 
 
 const selectedKeys = ref(['1']);
