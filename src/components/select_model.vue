@@ -1,31 +1,20 @@
 <script>
 import axios from "axios";
-import {ref, watch} from 'vue';
 import {TreeSelect} from 'ant-design-vue';
 
 const SHOW_PARENT = TreeSelect.SHOW_PARENT;
-const model_loading = ref(false)
-const treeData = ref([])
-const selected_models = ref([])
-const language = ref("ZH")
-const devices = ref([])
-const device = ref("")
-const rootDir = ref("Data")
-watch(selected_models, () => {
-  console.log(selected_models.value);
-});
 
 
 export default {
   data() {
     return {
-      model_loading: model_loading,
-      treeData: treeData,
-      selected_models: selected_models,
-      language: language,
-      device: device,
-      devices: devices,
-      rootDir: rootDir
+      model_loading: false,
+      treeData: [],
+      selected_models: [],
+      language: "ZH",
+      device: "",
+      devices: [],
+      rootDir: "Data"
     }
   },
   name: "Select_Model",
@@ -36,7 +25,7 @@ export default {
   methods: {
     async get_local_models() {
       let url = `/models/get_local`
-      let params = {"root_dir": rootDir.value}
+      let params = {"root_dir": this.rootDir}
       try {
         const response = await axios.get(url, {
           timeout: 3000,
@@ -58,22 +47,22 @@ export default {
             for (let i = 0; i < data[dataset_name].length; i++) {
               dataset_node.children.push({
                 label: `${dataset_name}/${data[dataset_name][i]}`,
-                value: `${rootDir.value}/${dataset_name}/${data[dataset_name][i]}`
+                value: `${this.rootDir}/${dataset_name}/${data[dataset_name][i]}`
               })
             }
             result.push(dataset_node)
             dataset_count++
           }
-          treeData.value = result
+          this.treeData = result
           console.log(result)
 
         } else {
-          treeData.value = []
+          this.treeData = []
         }
 
       } catch (error) {
         console.error("get_local_models error", error)
-        treeData.value = []
+        this.treeData = []
       }
     },
 
@@ -83,12 +72,12 @@ export default {
         const response = await axios.get(url)
         if (response.status === 200) {
           let data = response.data
-          devices.value = data.devices
+          this.devices = data.devices
           // 设置默认设备，当有cuda时默认为cuda:0，否则为cpu
-          if (devices.value.length >= 2) {
-            device.value = devices.value[1]
+          if (this.devices.length >= 2) {
+            this.device = this.devices[1]
           } else {
-            device.value = devices.value[0]
+            this.device = this.devices[0]
           }
         }
       } catch (error) {
@@ -112,14 +101,14 @@ export default {
     },
 
     async load_all_models() {
-      model_loading.value = true
-      let models = selected_models.value
-      selected_models.value = []
+      this.model_loading = true
+      let models = this.selected_models
+      this.selected_models = []
       // 加载所有选中的模型
       for (let index in models) {
-        await this.load_model(models[index], device.value, language.value)
+        await this.load_model(models[index], this.device, this.language)
       }
-      model_loading.value = false
+      this.model_loading = false
     }
   }
 }
