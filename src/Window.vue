@@ -41,18 +41,15 @@
   </a-layout>
 </template>
 <script>
-import {ref} from 'vue';
 import {defineComponent} from "vue";
 import infer from "@/infer.vue";
 
 
-const selectedKeys = ref(['1']);
-const collapsed = ref(false);
 export default defineComponent({
   data() {
     return {
-      selectedKeys: selectedKeys,
-      collapsed: collapsed
+      selectedKeys: ['1'],
+      collapsed: false
     }
   },
   components: {infer}
