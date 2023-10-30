@@ -45,6 +45,7 @@ export default {
       <h4>说话人</h4>
       <a-col style="margin-left: 1em" :span="6">
         <a-select
+            show-search
             ref="select"
             v-model:value="model.speaker_name"
             style="width: 100%"
