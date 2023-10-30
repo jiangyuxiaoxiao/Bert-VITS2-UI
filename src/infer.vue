@@ -3,61 +3,42 @@ import select_model from "@/components/select_model.vue";
 import status_card from "@/components/status_card.vue";
 import model_card from "@/components/model_card.vue";
 import colorTable from "@/color";
-import {ref} from "vue";
 import axios from "axios";
 import {CheckOutlined, CloseOutlined} from "@ant-design/icons-vue";
 
-const generate_audio_loading = ref(false)
-const delete_model_loading = ref(false)
-const registered_model = ref(new Set())
-const models = ref({})
-const global_sdp_ratio = ref(0.2)
-const global_sdp_ratio_selected = ref(false)
-const global_noise = ref(0.2)
-const global_noise_selected = ref(false)
-const global_noisew = ref(0.9)
-const global_noisew_selected = ref(false)
-const global_length = ref(1.0)
-const global_length_selected = ref(false)
-const global_speaker = ref("")
-const global_speaker_selected = ref(false)
-const global_language = ref("")
-const global_language_selected = ref(false)
-const select_all_choices = ref({
-  status: false,
-  type: "primary",
-  text: "选项全选"
-})
-const select_all_models = ref({
-  status: false,
-  type: "primary",
-  text: "模型全选"
-})
-const texts = ref("")
 export default {
   name: "infer",
   components: {model_card, status_card, select_model, CheckOutlined, CloseOutlined},
   data() {
     return {
-      generate_audio_loading: generate_audio_loading,
-      delete_model_loading:delete_model_loading,
+      generate_audio_loading: false,
+      delete_model_loading: false,
       colorTable: colorTable,
-      models: models,
-      texts: texts,
-      global_sdp_ratio: global_sdp_ratio,
-      global_sdp_ratio_selected: global_sdp_ratio_selected,
-      global_noise: global_noise,
-      global_noise_selected: global_noise_selected,
-      global_noisew: global_noisew,
-      global_noisew_selected: global_noisew_selected,
-      global_length: global_length,
-      global_length_selected: global_length_selected,
-      global_speaker: global_speaker,
-      global_speaker_selected: global_speaker_selected,
-      global_language: global_language,
-      global_language_selected: global_language_selected,
-      select_all_models: select_all_models,
-      select_all_choices: select_all_choices
+      models: {},
+      registered_model: new Set(),
+      texts: "",
+      global_sdp_ratio: 0.2,
+      global_sdp_ratio_selected: false,
+      global_noise: 0.2,
+      global_noise_selected: false,
+      global_noisew: 0.9,
+      global_noisew_selected: false,
+      global_length: 1.0,
+      global_length_selected: false,
+      global_speaker: "",
+      global_speaker_selected: false,
+      global_language: "",
+      global_language_selected: false,
+      select_all_models: {
+        status: false,
+        type: "primary",
+        text: "模型全选"
+      },
+      select_all_choices: {
+        status: false,
+        type: "primary",
+        text: "选项全选"
+      }
     }
   },
   mounted() {
@@ -81,13 +62,13 @@ export default {
           }
           for (let model_id in data) {
             // 注册新卡片
-            if (!registered_model.value.has(model_id)) {
+            if (!this.registered_model.has(model_id)) {
               let spk2id = data[model_id]["spk2id"]
               let speakers = []
               for (let spk in spk2id) {
                 speakers.push(spk)
               }
-              models.value[model_id] = {
+              this.models[model_id] = {
                 id: model_id,
                 name: data[model_id]["model_path"],
                 device: data[model_id]["device"],
@@ -108,17 +89,16 @@ export default {
                   }
                 }
               }
-              registered_model.value.add(model_id)
+              this.registered_model.add(model_id)
             }
           }
-          for (let model_id of registered_model.value) {
+          for (let model_id of this.registered_model) {
             // 删除不存在的模型
             if (!loaded_model.has(model_id)) {
-              registered_model.value.delete(model_id)
-              delete models.value[model_id]
+              this.registered_model.delete(model_id)
+              delete this.models[model_id]
             }
           }
-          //console.error(models.value)
         }
       } catch (exception) {
         console.log("获取已加载模型失败", exception)
@@ -162,30 +142,30 @@ export default {
 
     async infers() {
       // 推理所有选中模型
-      console.info(texts.value)
-      generate_audio_loading.value = true
-      for (let id in models.value) {
+      console.info(this.texts)
+      this.generate_audio_loading = true
+      for (let id in this.models) {
         // 消除上次的音频
-        models.value[id].audio.valid = false
-        if (models.value[id].selected) {
-          await this.infer_audio(texts.value, models.value[id])
+        this.models[id].audio.valid = false
+        if (this.models[id].selected) {
+          await this.infer_audio(this.texts, this.models[id])
         }
       }
-      generate_audio_loading.value = false
+      this.generate_audio_loading = false
     },
 
     async translate(to_language) {
       // 文本翻译
       let url = `/tools/translate`
       let params = {
-        texts: texts.value,
+        texts: this.texts,
         to_language: to_language
       }
       try {
         let response = await axios.get(url, {params: params})
         if (response.status === 200) {
           console.log(response.data.texts)
-          texts.value = response.data.texts
+          this.texts = response.data.texts
         }
       } catch (error) {
         console.error("翻译失败", error)
@@ -193,43 +173,43 @@ export default {
     },
 
     all_choices_button() {
-      if (select_all_choices.value.status === false) {
-        select_all_choices.value.status = true
-        select_all_choices.value.type = "default"
-        select_all_choices.value.text = "取消选项全选"
-        global_sdp_ratio_selected.value = true
-        global_noise_selected.value = true
-        global_noisew_selected.value = true
-        global_length_selected.value = true
-        global_speaker_selected.value = true
-        global_language_selected.value = true
+      if (this.select_all_choices.status === false) {
+        this.select_all_choices.status = true
+        this.select_all_choices.type = "default"
+        this.select_all_choices.text = "取消选项全选"
+        this.global_sdp_ratio_selected = true
+        this.global_noise_selected = true
+        this.global_noisew_selected = true
+        this.global_length_selected = true
+        this.global_speaker_selected = true
+        this.global_language_selected = true
       } else {
-        select_all_choices.value.status = false
-        select_all_choices.value.type = "primary"
-        select_all_choices.value.text = "选项全选"
-        global_sdp_ratio_selected.value = false
-        global_noise_selected.value = false
-        global_noisew_selected.value = false
-        global_length_selected.value = false
-        global_speaker_selected.value = false
-        global_language_selected.value = false
+        this.select_all_choices.status = false
+        this.select_all_choices.type = "primary"
+        this.select_all_choices.text = "选项全选"
+        this.global_sdp_ratio_selected = false
+        this.global_noise_selected = false
+        this.global_noisew_selected = false
+        this.global_length_selected = false
+        this.global_speaker_selected = false
+        this.global_language_selected = false
       }
     },
 
     all_models_button() {
-      if (select_all_models.value.status === false) {
-        select_all_models.value.status = true
-        select_all_models.value.type = "default"
-        select_all_models.value.text = "取消模型全选"
-        for (let model_id in models.value) {
-          models.value[model_id].selected = true
+      if (this.select_all_models.status === false) {
+        this.select_all_models.status = true
+        this.select_all_models.type = "default"
+        this.select_all_models.text = "取消模型全选"
+        for (let model_id in this.models) {
+          this.models[model_id].selected = true
         }
       } else {
-        select_all_models.value.status = false
-        select_all_models.value.type = "primary"
-        select_all_models.value.text = "模型全选"
-        for (let model_id in models.value) {
-          models.value[model_id].selected = false
+        this.select_all_models.status = false
+        this.select_all_models.type = "primary"
+        this.select_all_models.text = "模型全选"
+        for (let model_id in this.models) {
+          this.models[model_id].selected = false
         }
       }
     },
@@ -237,44 +217,44 @@ export default {
     async delete_selected_models() {
       // 卸载所有选中模型
       let url = `/models/delete`
-      delete_model_loading.value = true
-      for (let model_id in models.value) {
-        if (models.value[model_id].selected === true) {
+      this.delete_model_loading = true
+      for (let model_id in this.models) {
+        if (this.models[model_id].selected === true) {
           let params = {
-            model_id: parseInt(models.value[model_id].id)
+            model_id: parseInt(this.models[model_id].id)
           }
           try {
             await axios.get(url, {params: params})
           } catch (error) {
-            console.error(`模型${models.value[model_id].name}卸载失败`, error)
+            console.error(`模型${this.models[model_id].name}卸载失败`, error)
           }
         }
       }
-      delete_model_loading.value = false
+      this.delete_model_loading = false
     },
 
     apply_global_setting() {
-      for (let model_id in models.value) {
-        if (models.value[model_id].selected === true) {
-          if (global_sdp_ratio_selected.value === true) {
-            models.value[model_id].sdp_ratio = global_sdp_ratio.value
+      for (let model_id in this.models) {
+        if (this.models[model_id].selected === true) {
+          if (this.global_sdp_ratio_selected === true) {
+            this.models[model_id].sdp_ratio = this.global_sdp_ratio
           }
-          if (global_noise_selected.value === true) {
-            models.value[model_id].noise = global_noise.value
+          if (this.global_noise_selected === true) {
+            this.models[model_id].noise = this.global_noise
           }
-          if (global_noisew_selected.value === true) {
-            models.value[model_id].noisew = global_noisew.value
+          if (this.global_noisew_selected === true) {
+            this.models[model_id].noisew = this.global_noisew
           }
-          if (global_length_selected.value === true) {
-            models.value[model_id].length = global_length.value
+          if (this.global_length_selected === true) {
+            this.models[model_id].length = this.global_length
           }
-          if (global_speaker_selected.value === true) {
-            if (models.value[model_id].speakers.includes(global_speaker.value)) {
-              models.value[model_id].speaker_name = global_speaker.value
+          if (this.global_speaker_selected === true) {
+            if (this.models[model_id].speakers.includes(this.global_speaker)) {
+              this.models[model_id].speaker_name = this.global_speaker
             }
           }
-          if (global_language_selected.value === true) {
-            models.value[model_id].language = global_language.value
+          if (this.global_language_selected === true) {
+            this.models[model_id].language = this.global_language
           }
         }
       }
@@ -283,8 +263,8 @@ export default {
   computed: {
     allSpeakers() {
       let Speakers = new Set()
-      for (let index in models.value) {
-        for (let spk of models.value[index].speakers) {
+      for (let index in this.models) {
+        for (let spk of this.models[index].speakers) {
           if (!Speakers.has(spk)) {
             Speakers.add(spk)
           }
