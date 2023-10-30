@@ -1,48 +1,46 @@
 <script>
 import axios from "axios";
-import {ref} from 'vue';
 import colorTable from "@/color";
-
-
-let status = ref({
-  cpu: {
-    percent: 10.66,
-    color: colorTable[3],
-    memory: {
-      total: 1.0,
-      used: 0.1,
-      color: colorTable[3],
-    }
-  },
-  gpus: [
-    {
-      id: 0,
-      percent: 0,
-      color: colorTable[3],
-      memory: {
-        total: 1,
-        used: 0.1,
-        color: colorTable[3],
-      }
-    },
-    {
-      id: 1,
-      percent: 0,
-      color: colorTable[3],
-      memory: {
-        total: 1,
-        used: 0.1,
-        color: colorTable[3],
-      }
-    }
-  ]
-})
 
 
 export default {
   name: "status_card",
   data() {
-    return {status: status}
+    return {
+      status: {
+        cpu: {
+          percent: 10.66,
+          color: colorTable[3],
+          memory: {
+            total: 1.0,
+            used: 0.1,
+            color: colorTable[3],
+          }
+        },
+        gpus: [
+          {
+            id: 0,
+            percent: 0,
+            color: colorTable[3],
+            memory: {
+              total: 1,
+              used: 0.1,
+              color: colorTable[3],
+            }
+          },
+          {
+            id: 1,
+            percent: 0,
+            color: colorTable[3],
+            memory: {
+              total: 1,
+              used: 0.1,
+              color: colorTable[3],
+            }
+          }
+        ]
+      }
+    }
   },
   mounted() {
     this.getStatus()
@@ -57,25 +55,25 @@ export default {
         const response = await axios.get(url)
         if (response.status === 200) {
           let data = response.data
-          status.value.cpu.percent = data["cpu_percent"]
+          this.status.cpu.percent = data["cpu_percent"]
           // 设置颜色
-          if (status.value.cpu.percent > 75) {
-            status.value.cpu.color = colorTable[7]
-          } else if (status.value.cpu.percent > 50) {
-            status.value.cpu.color = colorTable[5]
+          if (this.status.cpu.percent > 75) {
+            this.status.cpu.color = colorTable[7]
+          } else if (this.status.cpu.percent > 50) {
+            this.status.cpu.color = colorTable[5]
           } else {
-            status.value.cpu.color = colorTable[3]
+            this.status.cpu.color = colorTable[3]
           }
-          status.value.cpu.memory.total = (data["memory_total"] / (1024 * 1024 * 1024)).toFixed(2)
-          status.value.cpu.memory.used = (data["memory_used"] / (1024 * 1024 * 1024)).toFixed(2)
+          this.status.cpu.memory.total = (data["memory_total"] / (1024 * 1024 * 1024)).toFixed(2)
+          this.status.cpu.memory.used = (data["memory_used"] / (1024 * 1024 * 1024)).toFixed(2)
           // 设置颜色
-          let memory_percent = 100 * status.value.cpu.memory.used / status.value.cpu.memory.total
+          let memory_percent = 100 * this.status.cpu.memory.used / this.status.cpu.memory.total
           if (memory_percent > 75) {
-            status.value.cpu.memory.color = colorTable[7]
+            this.status.cpu.memory.color = colorTable[7]
           } else if (memory_percent > 50) {
-            status.value.cpu.memory.color = colorTable[5]
+            this.status.cpu.memory.color = colorTable[5]
           } else {
-            status.value.cpu.memory.color = colorTable[3]
+            this.status.cpu.memory.color = colorTable[3]
           }
           let new_gpu_status = []
           for (let i = 0; i < data["gpu"].length; i++) {
@@ -112,7 +110,7 @@ export default {
                 }
             )
           }
-          status.value.gpus = new_gpu_status
+          this.status.gpus = new_gpu_status
         }
 
       } catch (error) {
