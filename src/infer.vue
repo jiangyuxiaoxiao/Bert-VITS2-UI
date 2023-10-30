@@ -408,6 +408,7 @@ export default {
                   <a-space size="small">
                     <a-checkbox v-model:checked="global_speaker_selected">说话人</a-checkbox>
                     <a-select
+                        show-search
                         ref="select"
                         v-model:value="global_speaker"
                         style="width: 10em"
