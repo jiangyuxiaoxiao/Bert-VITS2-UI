@@ -68,7 +68,7 @@ export default {
           <a-select-option value="EN"></a-select-option>
         </a-select>
       </a-col>
-      <a-col :offset="4">
+      <a-col :offset="3">
         <a-button @click="delete_model">卸载</a-button>
       </a-col>
 
