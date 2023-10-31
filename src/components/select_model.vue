@@ -124,10 +124,11 @@ export default {
         </a-space-compact>
 
       </a-col>
-      <a-col :span="18">
+      <a-col :span="14">
         <a-tree-select
             v-model:value="selected_models"
             style="width: 100%"
+            :virtual="false"
             :on-click="get_local_models"
             :tree-data="treeData"
             tree-checkable
@@ -138,7 +139,7 @@ export default {
             list-height="512"
         />
       </a-col>
-      <a-col :span="2">
+      <a-col :span="4">
         <a-select
             ref="select"
             v-model:value="device"
@@ -148,7 +149,7 @@ export default {
           <a-select-option v-for="dev in devices" :value="dev"></a-select-option>
         </a-select>
       </a-col>
-      <a-col :span="2">
+      <a-col :span="3">
         <a-select
             ref="select"
             v-model:value="language"
@@ -160,7 +161,7 @@ export default {
           <a-select-option value="EN"></a-select-option>
         </a-select>
       </a-col>
-      <a-col :span="2">
+      <a-col :span="3">
         <a-button type="primary" @click="load_all_models" :loading="model_loading">加载模型</a-button>
       </a-col>
     </a-row>

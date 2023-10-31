@@ -13,7 +13,7 @@
   >
   </a-config-provider>
   <a-layout style="min-height: 100vh">
-    <a-layout-sider theme="light" width="20%" v-model:collapsed="collapsed.value" collapsible >
+    <a-layout-sider theme="light" width="20%" v-model:collapsed="collapsed" collapsible >
       <div class="logo"/>
       <a-menu v-model:selectedKeys="selectedKeys" mode="inline">
         <a-menu-item key="1">
@@ -49,7 +49,7 @@ export default defineComponent({
   data() {
     return {
       selectedKeys: ['1'],
-      collapsed: false
+      collapsed: true
     }
   },
   components: {infer}
