@@ -1,14 +1,16 @@
 <script>
-import select_model from "@/components/select_model.vue";
-import status_card from "@/components/status_card.vue";
-import model_card from "@/components/model_card.vue";
+// 推理页面
+
+import select_model from "@/components/infer/select_model.vue";
+import status_card from "@/components/infer/status_card.vue";
+import model_card from "@/components/infer/model_card.vue";
 import colorTable from "@/color";
 import axios from "axios";
-import {CheckOutlined, CloseOutlined} from "@ant-design/icons-vue";
+import {CheckOutlined, CloseOutlined, DownloadOutlined} from "@ant-design/icons-vue";
 
 export default {
   name: "infer",
-  components: {model_card, status_card, select_model, CheckOutlined, CloseOutlined},
+  components: {DownloadOutlined, model_card, status_card, select_model, CheckOutlined, CloseOutlined},
   data() {
     return {
       generate_audio_loading: false,
@@ -38,7 +40,17 @@ export default {
         status: false,
         type: "primary",
         text: "选项全选"
-      }
+      },
+      audio_dir: "Data",
+      random_audio: {
+        valid: false,
+        data: {
+          text: "",
+          src: "",
+          speaker: ""
+        }
+      },
+      random_language: "ZH"
     }
   },
   mounted() {
@@ -258,6 +270,41 @@ export default {
           }
         }
       }
+    },
+
+
+    async get_random_audio() {
+      // 获取随机音频
+      this.random_audio.valid = false
+      let url = `/tools/random_example`
+      let params = {
+        "language": this.random_language,
+        "root_dir": this.audio_dir
+      }
+      if (this.random_language === "随机"){
+        params = {
+          "root_dir": this.audio_dir
+        }
+      }
+      try {
+        let response = await axios.get(url, {params: params})
+        if (response.status === 200) {
+          let data = response.data
+          console.log(data)
+          if(data["status"] !== 0){
+            this.texts = data["detail"]
+            return
+          }
+          data = data["Data"]
+          this.random_audio.data.speaker = data["speaker"]
+          this.random_audio.data.text = data["text"]
+          this.texts = data["text"]
+          this.random_audio.valid = true
+          this.random_audio.data.src = `tools/get_audio?path=${data["audio"]}`
+        }
+      } catch (error) {
+        console.error(`音频获取失败`, error)
+      }
     }
   },
   computed: {
@@ -284,34 +331,7 @@ export default {
         <a-col :span="24">
           <status_card></status_card>
         </a-col>
-
-        <!-- 文本栏 -->
-        <a-col :span="24">
-          <a-card title="输入文本内容">
-            <a-row justify="start" :gutter="[16,16]">
-              <a-textarea v-model:value="texts" placeholder="请输入文本" :rows="7"/>
-              <a-space>
-                <a-button @click="translate('jp')"> 翻译日语</a-button>
-                <a-button @click="translate('en')"> 翻译英语</a-button>
-                <a-button v-show="false"> 快速切分</a-button>
-                <a-button type="primary" @click="infers" :loading="generate_audio_loading"> 生成音频</a-button>
-                <a-button v-show="false" type="primary"> 切分生成音频</a-button>
-              </a-space>
-            </a-row>
-          </a-card>
-
-        </a-col>
-      </a-row>
-    </a-col>
-
-    <!--
-    <a-divider :style="{'background-color':colorTable[5], 'height':'2px'} "/>
-    -->
-    <a-col :span="12">
-      <a-row justify="start" :gutter="[16,16]" align="bottom">
-        <a-col :span="24">
-          <select_model></select_model>
-        </a-col>
+        <!-- 全局设置 -->
         <a-col :span="24">
           <a-card title="全局设置">
             <a-row align="middle" justify="start" wrap="true">
@@ -437,7 +457,67 @@ export default {
           </a-card>
         </a-col>
 
+      </a-row>
+    </a-col>
 
+    <!--
+    <a-divider :style="{'background-color':colorTable[5], 'height':'2px'} "/>
+    -->
+    <a-col :span="12">
+      <a-row justify="start" :gutter="[16,16]" align="bottom">
+        <a-col :span="24">
+          <select_model></select_model>
+        </a-col>
+        <!-- 文本栏 -->
+        <a-col :span="24">
+          <a-card title="输入文本内容">
+            <a-row justify="start" :gutter="[16,16]">
+              <a-textarea v-model:value="texts" placeholder="请输入文本" :rows="8"/>
+              <a-col :span="24">
+                <a-space :size="24">
+                  <a-button @click="translate('jp')"> 翻译日语</a-button>
+                  <a-button @click="translate('en')"> 翻译英语</a-button>
+                  <a-button type="primary" @click="infers" :loading="generate_audio_loading"> 生成音频</a-button>
+                </a-space>
+              </a-col>
+              <a-col :span="24">
+                <a-space :size="24">
+                  <a-button @click="get_random_audio"> 随机音频示例</a-button>
+                  <a-tooltip title="随机音频搜索目录">
+                    <a-input v-model:value="audio_dir" placeholder="随机音频目录"/>
+                  </a-tooltip>
+                  <a-tooltip title="随机音频搜索语言">
+                    <a-select
+                        ref="select"
+                        v-model:value="random_language"
+                        style="width: 100%"
+                        @focus="focus"
+                    >
+                      <a-select-option value="ZH"></a-select-option>
+                      <a-select-option value="JP"></a-select-option>
+                      <a-select-option value="EN"></a-select-option>
+                      <a-select-option value="随机"></a-select-option>
+                    </a-select>
+                  </a-tooltip>
+                </a-space>
+              </a-col>
+              <a-col :span="24">
+                <a-space v-show="random_audio.valid" size="large">
+                  <audio :src="random_audio.data.src" controls></audio>
+                  <a-button :href="random_audio.data.src"
+                            :download=" random_audio.data.speaker + ': ' + texts + '.wav'">
+                    <template #icon>
+                      <DownloadOutlined/>
+                    </template>
+                    下载音频
+                  </a-button>
+                </a-space>
+              </a-col>
+
+            </a-row>
+          </a-card>
+
+        </a-col>
       </a-row>
     </a-col>
 

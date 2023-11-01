@@ -25,14 +25,14 @@
         <a-menu-item key="3">
           <span>设置</span>
         </a-menu-item>
-        <a-menu-item key="4">
-          <span>训练</span>
-        </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout>
       <a-layout-content style="margin: 0 16px" v-show="selectedKeys[0] === '1'">
         <infer></infer>
+      </a-layout-content>
+      <a-layout-content style="margin: 0 16px" v-show="selectedKeys[0] === '2'">
+        <help></help>
       </a-layout-content>
       <a-layout-footer style="text-align: center">
         Designed By Sora
@@ -43,6 +43,7 @@
 <script>
 import {defineComponent} from "vue";
 import infer from "@/infer.vue";
+import help from "@/help.vue";
 
 
 export default defineComponent({
@@ -52,7 +53,7 @@ export default defineComponent({
       collapsed: true
     }
   },
-  components: {infer}
+  components: {infer, help}
 })
 </script>
 <style scoped>
