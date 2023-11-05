@@ -103,7 +103,7 @@ export default {
     async load_all_models() {
       this.model_loading = true
       let models = this.selected_models
-      this.selected_models = []
+      // this.selected_models = []
       // 加载所有选中的模型
       for (let index in models) {
         await this.load_model(models[index], this.device, this.language)

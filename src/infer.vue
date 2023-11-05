@@ -472,7 +472,7 @@ export default {
         <a-col :span="24">
           <a-card title="输入文本内容">
             <a-row justify="start" :gutter="[16,16]">
-              <a-textarea v-model:value="texts" placeholder="请输入文本" :rows="8"/>
+              <a-textarea v-model:value="texts" placeholder="请输入文本" :rows="7"/>
               <a-col :span="24">
                 <a-space :size="24">
                   <a-button @click="translate('jp')"> 翻译日语</a-button>
@@ -480,6 +480,7 @@ export default {
                   <a-button type="primary" @click="infers" :loading="generate_audio_loading"> 生成音频</a-button>
                 </a-space>
               </a-col>
+              <a-divider/>
               <a-col :span="24">
                 <a-space :size="24">
                   <a-button @click="get_random_audio"> 随机音频示例</a-button>

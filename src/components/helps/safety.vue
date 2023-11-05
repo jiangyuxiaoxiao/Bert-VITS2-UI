@@ -6,7 +6,11 @@ export default {
 </script>
 
 <template>
-安全性说明
+  <a-typography>
+    <a-typography-title :level="2">请勿将本项目的网页对外网开放。
+    </a-typography-title>
+  </a-typography>
+
 </template>
 
 <style scoped>

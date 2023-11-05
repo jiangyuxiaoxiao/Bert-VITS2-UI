@@ -22,9 +22,6 @@
         <a-menu-item key="2">
           <span>帮助</span>
         </a-menu-item>
-        <a-menu-item key="3">
-          <span>设置</span>
-        </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout>
