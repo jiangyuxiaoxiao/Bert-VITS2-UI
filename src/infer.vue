@@ -122,7 +122,6 @@ export default {
       // 推理指定模型
       let url = `/voice`
       let params = {
-        text: texts,
         model_id: parseInt(model.id),
         speaker_name: model.speaker_name,
         sdp_ratio: model.sdp_ratio,
@@ -135,7 +134,7 @@ export default {
       }
       try {
         model.audio.loading = true
-        let response = await axios.get(url, {
+        let response = await axios.post(url, {"text": texts}, {
           params: params,
           responseType: "blob"
         })
@@ -327,7 +326,7 @@ export default {
 </script>
 
 <template>
-  <a-row justify="start" :gutter="[16,16]">
+  <a-row justify="start" :gutter="[16,16]" align="bottom">
     <a-col :span="12">
       <a-row justify="start" :gutter="[16,16]">
         <!-- 状态栏 -->
