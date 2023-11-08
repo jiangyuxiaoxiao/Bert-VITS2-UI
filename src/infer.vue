@@ -50,6 +50,7 @@ export default {
           speaker: ""
         }
       },
+      auto_translate: false,
       random_language: "ZH"
     }
   },
@@ -117,7 +118,7 @@ export default {
       }
     },
 
-    async infer_audio(texts, model) {
+    async infer_audio(texts, model, auto_split) {
       // 推理指定模型
       let url = `/voice`
       let params = {
@@ -128,7 +129,9 @@ export default {
         noise: model.noise,
         noisew: model.noisew,
         length: model.length,
-        language: model.language
+        language: model.language,
+        auto_translate: this.auto_translate,
+        auto_split: auto_split
       }
       try {
         model.audio.loading = true
@@ -152,15 +155,15 @@ export default {
       }
     },
 
-    async infers() {
+    async infers(auto_split) {
       // 推理所有选中模型
-      console.info(this.texts)
+      // console.info(this.texts)
       this.generate_audio_loading = true
       for (let id in this.models) {
         // 消除上次的音频
         this.models[id].audio.valid = false
         if (this.models[id].selected) {
-          await this.infer_audio(this.texts, this.models[id])
+          await this.infer_audio(this.texts, this.models[id], auto_split)
         }
       }
       this.generate_audio_loading = false
@@ -281,7 +284,7 @@ export default {
         "language": this.random_language,
         "root_dir": this.audio_dir
       }
-      if (this.random_language === "随机"){
+      if (this.random_language === "随机") {
         params = {
           "root_dir": this.audio_dir
         }
@@ -291,7 +294,7 @@ export default {
         if (response.status === 200) {
           let data = response.data
           console.log(data)
-          if(data["status"] !== 0){
+          if (data["status"] !== 0) {
             this.texts = data["detail"]
             return
           }
@@ -475,9 +478,17 @@ export default {
               <a-textarea v-model:value="texts" placeholder="请输入文本" :rows="7"/>
               <a-col :span="24">
                 <a-space :size="24">
-                  <a-button @click="translate('jp')"> 翻译日语</a-button>
-                  <a-button @click="translate('en')"> 翻译英语</a-button>
-                  <a-button type="primary" @click="infers" :loading="generate_audio_loading"> 生成音频</a-button>
+                  <a-button @click="translate('jp')">翻译日语</a-button>
+                  <a-button @click="translate('en')">翻译英语</a-button>
+                  <a-button @click="auto_translate = !auto_translate">{{
+                      auto_translate ? '取消自动翻译' : '自动翻译'
+                    }}
+                  </a-button>
+                  <a-switch v-model:checked="auto_translate">
+                  </a-switch>
+                  <a-button type="primary" @click="infers(false)" :loading="generate_audio_loading"> 生成音频</a-button>
+                  <a-button type="primary" @click="infers(true)" :loading="generate_audio_loading"> 切分生成音频
+                  </a-button>
                 </a-space>
               </a-col>
               <a-divider/>
