@@ -14,7 +14,8 @@
     "axios": "^1.5.1",
     "highlight.js": "^11.9.0",
     "unplugin-vue-markdown": "^0.24.3",
-    "vue": "^3.3.4"
+    "vue": "^3.3.4",
+    "vue-timer-hook": "^1.0.84"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",

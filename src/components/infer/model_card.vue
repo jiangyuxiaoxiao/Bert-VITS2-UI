@@ -1,15 +1,21 @@
 <script>
 import axios from "axios";
-import { DownloadOutlined } from '@ant-design/icons-vue';
+import {DownloadOutlined} from '@ant-design/icons-vue';
+import {useTimer} from "vue-timer-hook";
 
 export default {
   name: "model_card",
 
   props: ["name", "speakers", "model"],
+  data() {
+    return {
+      time: new Date()
+    }
+  },
   mounted() {
     this.speaker_name = this.speakers[0]
   },
-  components:{
+  components: {
     DownloadOutlined
   },
 
@@ -133,22 +139,20 @@ export default {
       </a-col>
 
       <!-- 音频相关 -->
-      <a-col :span = "24" v-show="model.audio.loading">
-        <a-spin />
+      <a-col :span="24" >
+        <a-spin :spinning=model.audio.loading>
+          <a-space :style="{opacity: model.audio.valid? 1: 0}" size="large">
+            <audio :src="model.audio.data.src" controls></audio>
+            <a-button :href="model.audio.data.src"
+                      :download="getName(model.audio.data.texts, model.name)">
+              <template #icon>
+                <DownloadOutlined/>
+              </template>
+              下载音频
+            </a-button>
+          </a-space>
+        </a-spin>
       </a-col>
-
-      <a-space v-show="model.audio.valid" size="large">
-        <audio :src="model.audio.data.src" controls></audio>
-        <a-button :href="model.audio.data.src"
-                  :download="getName(model.audio.data.texts, model.name)">
-          <template #icon>
-            <DownloadOutlined/>
-          </template>
-          下载音频
-        </a-button>
-      </a-space>
-
-
     </a-row>
 
 
