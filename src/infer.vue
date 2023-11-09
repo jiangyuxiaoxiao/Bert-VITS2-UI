@@ -16,7 +16,7 @@ export default {
       generate_audio_loading: false,
       delete_model_loading: false,
       colorTable: colorTable,
-      models: {},
+      models: [],
       registered_model: new Set(),
       texts: "",
       global_sdp_ratio: 0.2,
@@ -51,6 +51,8 @@ export default {
         }
       },
       auto_translate: false,
+      auto_split: false,
+      auto_blind: false,
       random_language: "ZH"
     }
   },
@@ -81,7 +83,7 @@ export default {
               for (let spk in spk2id) {
                 speakers.push(spk)
               }
-              this.models[model_id] = {
+              this.models.push({
                 id: model_id,
                 name: data[model_id]["model_path"],
                 device: data[model_id]["device"],
@@ -100,8 +102,9 @@ export default {
                     texts: "",
                     src: ""
                   }
-                }
-              }
+                },
+                visible: true
+              })
               this.registered_model.add(model_id)
             }
           }
@@ -109,7 +112,10 @@ export default {
             // 删除不存在的模型
             if (!loaded_model.has(model_id)) {
               this.registered_model.delete(model_id)
-              delete this.models[model_id]
+              // 从列表中弹出所有符合项
+              this.models = this.models.filter(
+                  model => model.id !== model_id
+              )
             }
           }
         }
@@ -154,15 +160,34 @@ export default {
       }
     },
 
-    async infers(auto_split) {
+    async infers() {
       // 推理所有选中模型
-      // console.info(this.texts)
+      // auto_split :是否自动切分
+      // blind 是否开启盲盒
+      if (this.auto_blind) {
+        // 遮盖
+        for (let model of this.models.values()) {
+          if (model.selected) {
+            model.visible = false
+          }
+        }
+        // 打乱 Fisher-Yates Shuffle
+        let indexs = this.models.map((model, index, ms) => model.selected ? index : -1).filter(id => id !== -1)
+        for (let i = indexs.length - 1; i >= 0; i--) {
+          let j = Math.floor(Math.random() * (i + 1))
+          let left = indexs[i]
+          let right = indexs[j]
+          let temp = this.models[right]
+          this.models[right] = this.models[left]
+          this.models[left] = temp
+        }
+      }
       this.generate_audio_loading = true
-      for (let id in this.models) {
+      for (let model of this.models.values()) {
         // 消除上次的音频
-        this.models[id].audio.valid = false
-        if (this.models[id].selected) {
-          await this.infer_audio(this.texts, this.models[id], auto_split)
+        model.audio.valid = false
+        if (model.selected) {
+          await this.infer_audio(this.texts, model, this.auto_split)
         }
       }
       this.generate_audio_loading = false
@@ -215,15 +240,15 @@ export default {
         this.select_all_models.status = true
         this.select_all_models.type = "default"
         this.select_all_models.text = "取消模型全选"
-        for (let model_id in this.models) {
-          this.models[model_id].selected = true
+        for (let model of this.models.values()) {
+          model.selected = true
         }
       } else {
         this.select_all_models.status = false
         this.select_all_models.type = "primary"
         this.select_all_models.text = "模型全选"
-        for (let model_id in this.models) {
-          this.models[model_id].selected = false
+        for (let model of this.models.values()) {
+          model.selected = false
         }
       }
     },
@@ -232,15 +257,15 @@ export default {
       // 卸载所有选中模型
       let url = `/models/delete`
       this.delete_model_loading = true
-      for (let model_id in this.models) {
-        if (this.models[model_id].selected === true) {
+      for (let model of this.models.values()) {
+        if (model.selected === true) {
           let params = {
-            model_id: parseInt(this.models[model_id].id)
+            model_id: parseInt(model.id)
           }
           try {
             await axios.get(url, {params: params})
           } catch (error) {
-            console.error(`模型${this.models[model_id].name}卸载失败`, error)
+            console.error(`模型${model.name}卸载失败`, error)
           }
         }
       }
@@ -248,32 +273,31 @@ export default {
     },
 
     apply_global_setting() {
-      for (let model_id in this.models) {
-        if (this.models[model_id].selected === true) {
+      for (let model of this.models.values()) {
+        if (model.selected === true) {
           if (this.global_sdp_ratio_selected === true) {
-            this.models[model_id].sdp_ratio = this.global_sdp_ratio
+            model.sdp_ratio = this.global_sdp_ratio
           }
           if (this.global_noise_selected === true) {
-            this.models[model_id].noise = this.global_noise
+            model.noise = this.global_noise
           }
           if (this.global_noisew_selected === true) {
-            this.models[model_id].noisew = this.global_noisew
+            model.noisew = this.global_noisew
           }
           if (this.global_length_selected === true) {
-            this.models[model_id].length = this.global_length
+            model.length = this.global_length
           }
           if (this.global_speaker_selected === true) {
-            if (this.models[model_id].speakers.includes(this.global_speaker)) {
-              this.models[model_id].speaker_name = this.global_speaker
+            if (model.speakers.includes(this.global_speaker)) {
+              model.speaker_name = this.global_speaker
             }
           }
           if (this.global_language_selected === true) {
-            this.models[model_id].language = this.global_language
+            model.language = this.global_language
           }
         }
       }
     },
-
 
     async get_random_audio() {
       // 获取随机音频
@@ -312,8 +336,8 @@ export default {
   computed: {
     allSpeakers() {
       let Speakers = new Set()
-      for (let index in this.models) {
-        for (let spk of this.models[index].speakers) {
+      for (let model of this.models.values()) {
+        for (let spk of model.speakers) {
           if (!Speakers.has(spk)) {
             Speakers.add(spk)
           }
@@ -477,20 +501,44 @@ export default {
               <a-textarea v-model:value="texts" placeholder="请输入文本" :rows="7"/>
               <a-col :span="24">
                 <a-space :size="24">
+                  <a-button @click="translate('zh')">翻译中文</a-button>
                   <a-button @click="translate('jp')">翻译日语</a-button>
                   <a-button @click="translate('en')">翻译英语</a-button>
+                </a-space>
+              </a-col>
+              <a-col :span="24">
+                <a-space :size="24">
                   <a-button @click="auto_translate = !auto_translate">{{
                       auto_translate ? '取消自动翻译' : '自动翻译'
                     }}
                   </a-button>
-                  <a-switch v-model:checked="auto_translate">
-                  </a-switch>
-                  <a-button type="primary" @click="infers(false)" :loading="generate_audio_loading"> 生成音频</a-button>
-                  <a-button type="primary" @click="infers(true)" :loading="generate_audio_loading"> 切分生成音频
+                  <a-switch v-model:checked="auto_translate"></a-switch>
+                  <a-button @click="auto_split = !auto_split">{{
+                      auto_split ? '取消自动切分' : '自动切分'
+                    }}
                   </a-button>
+                  <a-switch v-model:checked="auto_split"></a-switch>
+                  <a-button @click="auto_blind = !auto_blind">{{
+                      auto_blind ? '取消盲盒模式' : '盲盒模式'
+                    }}
+                  </a-button>
+                  <a-switch v-model:checked="auto_blind"></a-switch>
                 </a-space>
               </a-col>
-              <a-divider/>
+              <a-col :span="24">
+                <a-space>
+                  <a-button type="primary" @click="infers(false)" :loading="generate_audio_loading"> 生成音频</a-button>
+                </a-space>
+              </a-col>
+
+
+            </a-row>
+          </a-card>
+        </a-col>
+
+        <a-col :span="24">
+          <a-card>
+            <a-row justify="start" :gutter="[16,16]">
               <a-col :span="24">
                 <a-space :size="24">
                   <a-button @click="get_random_audio"> 随机音频示例</a-button>
@@ -513,7 +561,7 @@ export default {
                 </a-space>
               </a-col>
               <a-col :span="24">
-                <a-space v-show="random_audio.valid" size="large">
+                <a-space size="large" :style="{opacity:random_audio.valid?1:0}">
                   <audio :src="random_audio.data.src" controls></audio>
                   <a-button :href="random_audio.data.src"
                             :download=" random_audio.data.speaker + ': ' + texts + '.wav'">
@@ -524,16 +572,15 @@ export default {
                   </a-button>
                 </a-space>
               </a-col>
-
             </a-row>
           </a-card>
-
         </a-col>
+
       </a-row>
     </a-col>
 
 
-    <a-col :span="8" v-for="(model, id) in models">
+    <a-col :span="8" v-for="model in models">
       <model_card :name="model.name" :speakers="model.speakers" :model="model"></model_card>
     </a-col>
   </a-row>
