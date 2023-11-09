@@ -53,6 +53,7 @@ export default {
       auto_translate: false,
       auto_split: false,
       auto_blind: false,
+      random_speaker:false,
       random_language: "ZH"
     }
   },
@@ -125,6 +126,9 @@ export default {
     },
 
     async infer_audio(texts, model, auto_split) {
+      if(this.random_speaker){
+        model.speaker_name =  model.speakers[Math.floor(Math.random() * model.speakers.length)]
+      }
       // 推理指定模型
       let url = `/voice`
       let params = {
@@ -504,15 +508,16 @@ export default {
                   <a-button @click="translate('zh')">翻译中文</a-button>
                   <a-button @click="translate('jp')">翻译日语</a-button>
                   <a-button @click="translate('en')">翻译英语</a-button>
-                </a-space>
-              </a-col>
-              <a-col :span="24">
-                <a-space :size="24">
                   <a-button @click="auto_translate = !auto_translate">{{
                       auto_translate ? '取消自动翻译' : '自动翻译'
                     }}
                   </a-button>
                   <a-switch v-model:checked="auto_translate"></a-switch>
+                </a-space>
+              </a-col>
+              <a-col :span="24">
+                <a-space :size="24">
+
                   <a-button @click="auto_split = !auto_split">{{
                       auto_split ? '取消自动切分' : '自动切分'
                     }}
@@ -523,6 +528,11 @@ export default {
                     }}
                   </a-button>
                   <a-switch v-model:checked="auto_blind"></a-switch>
+                  <a-button @click="random_speaker = !random_speaker">{{
+                      random_speaker ? '取消随机说话人' : '随机说话人'
+                    }}
+                  </a-button>
+                  <a-switch v-model:checked="random_speaker"></a-switch>
                 </a-space>
               </a-col>
               <a-col :span="24">
