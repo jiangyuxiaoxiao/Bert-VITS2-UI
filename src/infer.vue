@@ -174,6 +174,7 @@ export default {
           if (model.selected) {
             model.visible = false
           }
+          model.audio.valid = false
         }
         // 打乱 Fisher-Yates Shuffle
         let indexs = this.models.map((model, index, ms) => model.selected ? index : -1).filter(id => id !== -1)

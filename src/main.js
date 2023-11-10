@@ -14,8 +14,10 @@ hljs.registerLanguage('javascript', javascript);
 
 const viewportWidth = window.innerWidth;
 console.log(window.innerWidth)
-if (viewportWidth < 2060) {
+if (viewportWidth < 2560) {
     document.body.style.zoom = "75%";
+} else if (viewportWidth < 1920) {
+    document.body.style.zoom = "65%";
 }
 
 
