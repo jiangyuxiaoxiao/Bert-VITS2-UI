@@ -6,11 +6,11 @@ import status_card from "@/components/infer/status_card.vue";
 import model_card from "@/components/infer/model_card.vue";
 import colorTable from "@/color";
 import axios from "axios";
-import {CheckOutlined, CloseOutlined, DownloadOutlined} from "@ant-design/icons-vue";
+import {CheckOutlined, CloseOutlined, DownloadOutlined, UploadOutlined} from "@ant-design/icons-vue";
 
 export default {
   name: "infer",
-  components: {DownloadOutlined, model_card, status_card, select_model, CheckOutlined, CloseOutlined},
+  components: {DownloadOutlined, model_card, status_card, select_model, CheckOutlined, CloseOutlined, UploadOutlined},
   data() {
     return {
       generate_audio_loading: false,
@@ -53,8 +53,9 @@ export default {
       auto_translate: false,
       auto_split: false,
       auto_blind: false,
-      random_speaker:false,
-      random_language: "ZH"
+      random_speaker: false,
+      random_language: "ZH",
+      txt: []
     }
   },
   mounted() {
@@ -126,8 +127,8 @@ export default {
     },
 
     async infer_audio(texts, model, auto_split) {
-      if(this.random_speaker){
-        model.speaker_name =  model.speakers[Math.floor(Math.random() * model.speakers.length)]
+      if (this.random_speaker) {
+        model.speaker_name = model.speakers[Math.floor(Math.random() * model.speakers.length)]
       }
       // 推理指定模型
       let url = `/voice`
@@ -336,6 +337,15 @@ export default {
       } catch (error) {
         console.error(`音频获取失败`, error)
       }
+    },
+
+    get_text(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.texts = e.target.result
+      };
+      reader.readAsText(file)
+      return false
     }
   },
   computed: {
@@ -502,6 +512,20 @@ export default {
         <!-- 文本栏 -->
         <a-col :span="24">
           <a-card title="输入文本内容">
+            <template #extra>
+              <a-upload
+                  v-model:file-list="txt"
+                  :show-upload-list="false"
+                  :max-count="1"
+                  accept=".txt"
+                  :before-upload="get_text"
+              >
+                <a-button>
+                  <upload-outlined></upload-outlined>
+                  上传文本
+                </a-button>
+              </a-upload>
+            </template>
             <a-row justify="start" :gutter="[16,16]">
               <a-textarea v-model:value="texts" placeholder="请输入文本" :rows="7"/>
               <a-col :span="24">
@@ -537,7 +561,7 @@ export default {
                 </a-space>
               </a-col>
               <a-col :span="24">
-                <a-space>
+                <a-space :size="24">
                   <a-button type="primary" @click="infers(false)" :loading="generate_audio_loading"> 生成音频</a-button>
                 </a-space>
               </a-col>

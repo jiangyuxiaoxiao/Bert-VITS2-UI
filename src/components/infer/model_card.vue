@@ -32,9 +32,9 @@ export default {
       }
     },
 
-    getName(text, name) {
+    getName(text, name, speaker_name) {
       let name2 = name.replace(/^Data\\|^Data\//, '').replace(/models\\|models\//, '')
-      return text + "@" + name2 + ".wav"
+      return text.substring(0, 10) + "@" + name2 + "@" + speaker_name + ".wav"
     }
   }
 }
@@ -149,7 +149,7 @@ export default {
               <a-space :style="{opacity: model.audio.valid? 1: 0}" size="large">
                 <audio :src="model.audio.data.src" controls></audio>
                 <a-button :href="model.audio.data.src"
-                          :download="getName(model.audio.data.texts, model.name)">
+                          :download="getName(model.audio.data.texts, model.name, model.speaker_name)">
                   <template #icon>
                     <DownloadOutlined/>
                   </template>
@@ -167,7 +167,6 @@ export default {
         </a-row>
       </a-col>
     </a-row>
-
 
 
   </a-card>

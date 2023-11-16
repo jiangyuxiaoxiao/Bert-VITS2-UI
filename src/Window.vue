@@ -13,15 +13,19 @@
   >
   </a-config-provider>
   <a-layout style="min-height: 100vh">
-    <a-layout-sider theme="light" width="20%" v-model:collapsed="collapsed" collapsible >
+    <a-layout-sider theme="light" width="20%" v-model:collapsed="collapsed" collapsible>
       <div class="logo"/>
       <a-menu v-model:selectedKeys="selectedKeys" mode="inline">
         <a-menu-item key="1">
           <span>推理</span>
         </a-menu-item>
         <a-menu-item key="2">
+          <span>数据集处理</span>
+        </a-menu-item>
+        <a-menu-item key="3">
           <span>帮助</span>
         </a-menu-item>
+
       </a-menu>
     </a-layout-sider>
     <a-layout>
@@ -29,6 +33,9 @@
         <infer></infer>
       </a-layout-content>
       <a-layout-content style="margin: 0 16px" v-show="selectedKeys[0] === '2'">
+        <dataset></dataset>
+      </a-layout-content>
+      <a-layout-content style="margin: 0 16px" v-show="selectedKeys[0] === '3'">
         <help></help>
       </a-layout-content>
       <a-layout-footer style="text-align: center">
@@ -41,7 +48,7 @@
 import {defineComponent} from "vue";
 import infer from "@/infer.vue";
 import help from "@/help.vue";
-
+import dataset from "@/dataset.vue";
 
 export default defineComponent({
   data() {
@@ -50,7 +57,7 @@ export default defineComponent({
       collapsed: true
     }
   },
-  components: {infer, help}
+  components: {dataset, infer, help}
 })
 </script>
 <style scoped>
