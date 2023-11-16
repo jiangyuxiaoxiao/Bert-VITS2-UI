@@ -17,16 +17,16 @@
       <div class="logo"/>
       <a-menu v-model:selectedKeys="selectedKeys" mode="inline">
         <a-menu-item key="1">
-          <span>推理</span>
+          <span>{{ collapsed ? "推理" : "音频推理" }}</span>
         </a-menu-item>
         <a-menu-item key="2">
-          <span>数据</span>
+          <span>{{ collapsed ? "数据" : "数据集处理" }}</span>
         </a-menu-item>
-        <a-menu-item key="3" title="API">
-          <span>API</span>
+        <a-menu-item key="3">
+          <span>{{ collapsed ? "API" : "API文档" }}</span>
         </a-menu-item>
         <a-menu-item key="4">
-          <span>帮助</span>
+          <span>{{ collapsed ? "帮助" : "帮助页面" }}</span>
         </a-menu-item>
 
       </a-menu>
