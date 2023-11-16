@@ -20,9 +20,12 @@
           <span>推理</span>
         </a-menu-item>
         <a-menu-item key="2">
-          <span>数据集处理</span>
+          <span>数据</span>
         </a-menu-item>
-        <a-menu-item key="3">
+        <a-menu-item key="3" title="API">
+          <span>API</span>
+        </a-menu-item>
+        <a-menu-item key="4">
           <span>帮助</span>
         </a-menu-item>
 
@@ -36,6 +39,9 @@
         <dataset></dataset>
       </a-layout-content>
       <a-layout-content style="margin: 0 16px" v-show="selectedKeys[0] === '3'">
+        <iframe src="/docs"></iframe>
+      </a-layout-content>
+      <a-layout-content style="margin: 0 16px" v-show="selectedKeys[0] === '4'">
         <help></help>
       </a-layout-content>
       <a-layout-footer style="text-align: center">
@@ -61,4 +67,10 @@ export default defineComponent({
 })
 </script>
 <style scoped>
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none; /* 移除边框 */
+  overflow: hidden;
+}
 </style>
