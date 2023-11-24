@@ -55,7 +55,8 @@ export default {
       auto_blind: false,
       random_speaker: false,
       random_language: "ZH",
-      txt: []
+      txt: [],
+      card_width : 8
     }
   },
   mounted() {

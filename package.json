@@ -10,6 +10,7 @@
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
     "@highlightjs/vue-plugin": "^2.1.0",
+    "@surely-vue/table": "^4.2.2",
     "ant-design-vue": "^4.0.6",
     "axios": "^1.5.1",
     "highlight.js": "^11.9.0",

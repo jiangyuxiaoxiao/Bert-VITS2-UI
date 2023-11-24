@@ -20,7 +20,6 @@ if (viewportWidth < 2560) {
     document.body.style.zoom = "65%";
 }
 
-
 const app = createApp(Window)
 
 app.use(Antd).use(hljsVuePlugin).mount('#app')

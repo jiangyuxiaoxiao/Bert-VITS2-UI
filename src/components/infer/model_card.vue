@@ -32,6 +32,7 @@ export default {
       }
     },
 
+    
     getName(text, name, speaker_name) {
       let name2 = name.replace(/^Data\\|^Data\//, '').replace(/models\\|models\//, '')
       return text.substring(0, 10) + "@" + name2 + "@" + speaker_name + ".wav"
