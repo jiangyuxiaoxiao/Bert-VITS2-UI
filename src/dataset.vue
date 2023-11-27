@@ -344,7 +344,7 @@ export default {
     >
       <p class="ant-upload-text">点击或拖拽上传数据集文件</p>
       <p class="ant-upload-hint">
-        支持上传预处理前、预处理后数据集文件以及对应的中间保存文件。上传同名文件时会重新加载，请注意。
+        支持上传预处理前、预处理后数据集文件以及对应的中间保存文件。上传同名文件时会重新加载。<br/>预处理前数据集文件允许修改文本，预处理后的文件不允许。
       </p>
     </a-upload-dragger>
   </a-card>
@@ -434,7 +434,11 @@ export default {
                     <a-tag color="#bdb2ff">{{ data.language }}</a-tag>
                     <!-- 文本 -->
                     <a-col :span="24">
-                      <a-textarea v-model:value="data.text" auto-size=""></a-textarea>
+                      <a-textarea
+                          v-model:value="data.text"
+                          auto-size=""
+                          :disabled="files[selected_file].type === 7 || files[selected_file].type === 8"
+                      ></a-textarea>
                     </a-col>
                     <!-- 音频及处理按钮 -->
                     <a-col :span="24">
@@ -498,7 +502,11 @@ export default {
                   <a-tag color="#bdb2ff">{{ data.language }}</a-tag>
                   <!-- 文本 -->
                   <a-col :span="24">
-                    <a-textarea v-model:value="data.text" auto-size=""></a-textarea>
+                    <a-textarea
+                        v-model:value="data.text"
+                        auto-size=""
+                        :disabled="files[selected_file].type === 7 || files[selected_file].type === 8"
+                    ></a-textarea>
                   </a-col>
                   <!-- 音频及处理按钮 -->
                   <a-col :span="24">
@@ -559,7 +567,11 @@ export default {
                   <a-tag color="#bdb2ff">{{ data.language }}</a-tag>
                   <!-- 文本 -->
                   <a-col :span="24">
-                    <a-textarea v-model:value="data.text" auto-size=""></a-textarea>
+                    <a-textarea
+                        v-model:value="data.text"
+                        auto-size=""
+                        :disabled="files[selected_file].type === 7 || files[selected_file].type === 8"
+                    ></a-textarea>
                   </a-col>
                   <!-- 音频及处理按钮 -->
                   <a-col :span="24">
@@ -620,7 +632,11 @@ export default {
                   <a-tag color="#bdb2ff">{{ data.language }}</a-tag>
                   <!-- 文本 -->
                   <a-col :span="24">
-                    <a-textarea v-model:value="data.text" auto-size=""></a-textarea>
+                    <a-textarea
+                        v-model:value="data.text"
+                        auto-size=""
+                        :disabled="files[selected_file].type === 7 || files[selected_file].type === 8"
+                    ></a-textarea>
                   </a-col>
                   <!-- 音频及处理按钮 -->
                   <a-col :span="24">
