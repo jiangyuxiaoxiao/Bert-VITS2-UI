@@ -140,6 +140,22 @@ export default {
                 style="margin-left: 16px"
             />
           </a-col>
+
+          <a-col :span="24"></a-col>
+          <h4 style="width: 4em">emotion</h4>
+          <a-col :span="16">
+            <a-slider v-model:value="model.emotion" :min="0" :max="9" :step="1"/>
+          </a-col>
+          <a-col :span="2">
+            <a-input-number
+                v-model:value="model.emotion"
+                :min="0"
+                :max="9"
+                :step="1"
+                style="margin-left: 16px"
+            />
+          </a-col>
+
         </a-row>
       </a-col>
       <a-col>

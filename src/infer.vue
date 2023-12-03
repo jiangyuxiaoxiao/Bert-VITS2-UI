@@ -27,6 +27,9 @@ export default {
       global_noisew_selected: false,
       global_length: 1.0,
       global_length_selected: false,
+      global_emotion: 0,
+      global_emotion_selected: false,
+      global_use_reference_audio: false,
       global_speaker: "",
       global_speaker_selected: false,
       global_language: "",
@@ -47,8 +50,10 @@ export default {
         data: {
           text: "",
           src: "",
-          speaker: ""
-        }
+          speaker: "",
+          name: ""
+        },
+        audio_file: null
       },
       auto_translate: false,
       auto_split: false,
@@ -56,7 +61,7 @@ export default {
       random_speaker: false,
       random_language: "ZH",
       txt: [],
-      card_width : 8
+      card_width: 8
     }
   },
   mounted() {
@@ -97,6 +102,7 @@ export default {
                 noisew: 0.9,
                 length: 1,
                 language: data[model_id]["language"],
+                emotion: 0,
                 selected: false,
                 audio: {
                   loading: false,
@@ -142,11 +148,18 @@ export default {
         length: model.length,
         language: model.language,
         auto_translate: this.auto_translate,
-        auto_split: auto_split
+        auto_split: auto_split,
+        emotion: model.emotion
+      }
+      let formData = new FormData()
+      formData.append("text", texts)
+      // 仅当使用参考音频且音频有效时生效
+      if (this.global_use_reference_audio && this.random_audio.valid && this.random_audio.audio_file !== null) {
+        formData.append("reference_audio", this.random_audio.audio_file)
       }
       try {
         model.audio.loading = true
-        let response = await axios.post(url, {"text": texts}, {
+        let response = await axios.post(url, formData, {
           params: params,
           responseType: "blob"
         })
@@ -227,6 +240,7 @@ export default {
         this.global_noise_selected = true
         this.global_noisew_selected = true
         this.global_length_selected = true
+        this.global_emotion_selected = true
         this.global_speaker_selected = true
         this.global_language_selected = true
       } else {
@@ -294,6 +308,9 @@ export default {
           if (this.global_length_selected === true) {
             model.length = this.global_length
           }
+          if (this.global_emotion_selected === true) {
+            model.emotion = this.global_emotion
+          }
           if (this.global_speaker_selected === true) {
             if (model.speakers.includes(this.global_speaker)) {
               model.speaker_name = this.global_speaker
@@ -332,8 +349,17 @@ export default {
           this.random_audio.data.speaker = data["speaker"]
           this.random_audio.data.text = data["text"]
           this.texts = data["text"]
-          this.random_audio.valid = true
           this.random_audio.data.src = `tools/get_audio?path=${data["audio"]}`
+          // 下载音频
+          try {
+            const response = await axios.get(`tools/get_audio?path=${data["audio"]}`, {responseType: 'blob'})
+            const blob = new Blob([response.data])
+            this.random_audio.audio_file = new File([blob], "random.mp3")
+            this.random_audio.valid = true
+            this.random_audio.data.name = ""
+            console.log(this.random_audio.audio_file)
+          } catch (error) {
+          }
         }
       } catch (error) {
         console.error(`音频获取失败`, error)
@@ -347,6 +373,16 @@ export default {
       };
       reader.readAsText(file)
       return false
+    },
+
+    get_audio(file) {
+      if (file) {
+        this.random_audio.audio_file = file
+        console.log(this.random_audio.audio_file)
+        this.random_audio.data.src = URL.createObjectURL(file)
+        this.random_audio.valid = true
+        this.random_audio.data.name = file.name
+      }
     }
   },
   computed: {
@@ -442,6 +478,24 @@ export default {
                     style="margin-left: 16px"
                 />
               </a-col>
+
+              <a-col :span="3">
+                <a-checkbox v-model:checked="global_emotion_selected">emotion</a-checkbox>
+              </a-col>
+              <a-col :span="16">
+                <a-slider v-model:value="global_emotion" :min="0" :max="9" :step="1"/>
+              </a-col>
+              <a-col :span="5">
+                <a-input-number
+                    v-model:value="global_emotion"
+                    :min="0"
+                    :max="9"
+                    :step="1"
+                    style="margin-left: 16px"
+                />
+              </a-col>
+
+
               <a-divider></a-divider>
 
               <!-- 角色相关 -->
@@ -594,13 +648,30 @@ export default {
                       <a-select-option value="随机"></a-select-option>
                     </a-select>
                   </a-tooltip>
+                  <a-upload
+                      :show-upload-list="false"
+                      :multiple="false"
+                      :before-upload="get_audio"
+                      accept="audio/*"
+                  >
+                    <a-button>
+                      <template #icon>
+                        <UploadOutlined/>
+                      </template>
+                      上传音频
+                    </a-button>
+                  </a-upload>
+                  <a-button @click="global_use_reference_audio=!global_use_reference_audio">
+                    {{ global_use_reference_audio ? "取消emo音频" : "作为emo音频" }}
+                  </a-button>
+                  <a-switch v-model:checked="global_use_reference_audio"></a-switch>
                 </a-space>
               </a-col>
               <a-col :span="24">
                 <a-space size="large" :style="{opacity:random_audio.valid?1:0}">
                   <audio :src="random_audio.data.src" controls></audio>
                   <a-button :href="random_audio.data.src"
-                            :download=" random_audio.data.speaker + ': ' + texts + '.wav'">
+                            :download="  random_audio.data.name===''? random_audio.data.speaker + ': ' + texts + '.wav' : random_audio.data.name">
                     <template #icon>
                       <DownloadOutlined/>
                     </template>
