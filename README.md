@@ -4,7 +4,10 @@
 BertVits2的前端界面
 
 ## 效果预览
+### 推理界面
 ![](docs/preview.png)
+### 数据集筛选界面
+![img.png](docs/preview2.png)
 
 ## 特点
 + 动态加载、卸载模型：更换模型无需重启。
