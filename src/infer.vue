@@ -29,6 +29,8 @@ export default {
       global_length_selected: false,
       global_emotion: 0,
       global_emotion_selected: false,
+      global_prompt: "",
+      global_prompt_selected: false,
       global_use_reference_audio: false,
       global_speaker: "",
       global_speaker_selected: false,
@@ -103,6 +105,7 @@ export default {
                 length: 1,
                 language: data[model_id]["language"],
                 emotion: 0,
+                prompt: "",
                 selected: false,
                 audio: {
                   loading: false,
@@ -112,7 +115,8 @@ export default {
                     src: ""
                   }
                 },
-                visible: true
+                visible: true,
+                version: data[model_id]["version"]
               })
               this.registered_model.add(model_id)
             }
@@ -149,7 +153,7 @@ export default {
         language: model.language,
         auto_translate: this.auto_translate,
         auto_split: auto_split,
-        emotion: model.emotion
+        emotion: model.version === "2.1" ? model.emotion : model.prompt
       }
       let formData = new FormData()
       formData.append("text", texts)
@@ -241,6 +245,7 @@ export default {
         this.global_noisew_selected = true
         this.global_length_selected = true
         this.global_emotion_selected = true
+        this.global_prompt_selected = true
         this.global_speaker_selected = true
         this.global_language_selected = true
       } else {
@@ -251,6 +256,8 @@ export default {
         this.global_noise_selected = false
         this.global_noisew_selected = false
         this.global_length_selected = false
+        this.global_emotion_selected = false
+        this.global_prompt_selected = false
         this.global_speaker_selected = false
         this.global_language_selected = false
       }
@@ -310,6 +317,9 @@ export default {
           }
           if (this.global_emotion_selected === true) {
             model.emotion = this.global_emotion
+          }
+          if (this.global_prompt_selected === true) {
+            model.prompt = this.global_prompt
           }
           if (this.global_speaker_selected === true) {
             if (model.speakers.includes(this.global_speaker)) {
@@ -493,6 +503,13 @@ export default {
                     :step="1"
                     style="margin-left: 16px"
                 />
+              </a-col>
+              <a-divider/>
+              <a-col :span="3">
+                <a-checkbox v-model:checked="global_prompt_selected">prompt</a-checkbox>
+              </a-col>
+              <a-col :span="16">
+                <a-input v-model:value="global_prompt" placeholder="Happy"/>
               </a-col>
 
 

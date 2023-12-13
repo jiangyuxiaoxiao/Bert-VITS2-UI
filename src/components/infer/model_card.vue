@@ -32,7 +32,7 @@ export default {
       }
     },
 
-    
+
     getName(text, name, speaker_name) {
       let name2 = name.replace(/^Data\\|^Data\//, '').replace(/models\\|models\//, '')
       return text.substring(0, 10) + "@" + name2 + "@" + speaker_name + ".wav"
@@ -142,7 +142,7 @@ export default {
           </a-col>
 
           <a-col :span="24"></a-col>
-          <h4 style="width: 4em">emotion</h4>
+          <h4 :style="{width: '4em'}">emotion</h4>
           <a-col :span="16">
             <a-slider v-model:value="model.emotion" :min="0" :max="9" :step="1"/>
           </a-col>
@@ -154,6 +154,12 @@ export default {
                 :step="1"
                 style="margin-left: 16px"
             />
+          </a-col>
+
+          <a-col :span="24"></a-col>
+          <h4 :style="{width: '4em'}">prompt</h4>
+          <a-col :span="20">
+            <a-input v-model:value="model.prompt" :min="0" :max="9" :step="1" placeholder="Happy"/>
           </a-col>
 
         </a-row>
