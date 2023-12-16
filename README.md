@@ -1,4 +1,18 @@
-# Hiyori UI for BertVits2
+<div align="center">
+    <a href="https://Hiyori.vip">
+        <img src="https://github.com/jiangyuxiaoxiao/Bert-VITS2-UI/blob/master/public/img/Hiyori2.png?raw=true" alt="Hiyori" style="height: 200px;width: auto">
+    </a>
+    <h1>Hiyori UI for BertVits2</h1>
+    <p align="center">
+      <a href="https://vuejs.org/guide/introduction.html">
+        <img alt="Static Badge" src="https://img.shields.io/badge/Vue3-blue">
+      </a>
+      <a href="https://antdv.com/components/overview">
+        <img alt="nonebot2-2.0.1" src="https://img.shields.io/badge/AntD-4.0.6-orange">
+      </a>
+    </p>
+</div>
+
 
 ## 简介
 BertVits2的前端界面
