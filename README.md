@@ -5,7 +5,7 @@
     <h1>Hiyori UI for BertVits2</h1>
     <p align="center">
       <a href="https://vuejs.org/guide/introduction.html">
-        <img alt="Static Badge" src="https://img.shields.io/badge/Vue3-blue">
+        <img alt="Static Badge" src="https://img.shields.io/badge/Vue-3-blue">
       </a>
       <a href="https://antdv.com/components/overview">
         <img alt="nonebot2-2.0.1" src="https://img.shields.io/badge/AntD-4.0.6-orange">
