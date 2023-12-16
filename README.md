@@ -1,5 +1,5 @@
 <div align="center">
-    <a href="https://Hiyori.vip">
+    <a>
         <img src="https://github.com/jiangyuxiaoxiao/Bert-VITS2-UI/blob/master/public/img/Hiyori2.png?raw=true" alt="Hiyori" style="height: 200px;width: auto">
     </a>
     <h1>Hiyori UI for BertVits2</h1>
