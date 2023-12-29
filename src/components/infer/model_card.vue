@@ -74,6 +74,8 @@ export default {
               <a-select-option value="ZH"></a-select-option>
               <a-select-option value="JP"></a-select-option>
               <a-select-option value="EN"></a-select-option>
+              <a-select-option value="MIX"></a-select-option>
+              <a-select-option value="AUTO"></a-select-option>
             </a-select>
           </a-col>
           <a-col :offset="3">
@@ -144,7 +146,7 @@ export default {
           <a-col :span="24"></a-col>
           <h4 :style="{width: '4em'}">emotion</h4>
           <a-col :span="16">
-            <a-slider v-model:value="model.emotion" :min="0" :max="9" :step="1"/>
+            <a-slider v-model:value="model.emotion" :disabled="model.version !== '2.1'" :min="0" :max="9" :step="1"/>
           </a-col>
           <a-col :span="2">
             <a-input-number
@@ -157,9 +159,24 @@ export default {
           </a-col>
 
           <a-col :span="24"></a-col>
+          <h4 :style="{width: '4em'}">promptw</h4>
+          <a-col :span="16">
+            <a-slider v-model:value="model.prompt_weight" :disabled="model.version !== '2.3'" :min="0" :max="1" :step="0.1"/>
+          </a-col>
+          <a-col :span="2">
+            <a-input-number
+                v-model:value="model.prompt_weight"
+                :min="0"
+                :max="1"
+                :step="0.1"
+                style="margin-left: 16px"
+            />
+          </a-col>
+
+          <a-col :span="24"></a-col>
           <h4 :style="{width: '4em'}">prompt</h4>
           <a-col :span="20">
-            <a-input v-model:value="model.prompt" :min="0" :max="9" :step="1" placeholder="Happy"/>
+            <a-input v-model:value="model.prompt" :min="0" :max="9" :step="1" placeholder="" :disabled="model.version !== '2.3' || model.version !== '2.2'"/>
           </a-col>
 
         </a-row>

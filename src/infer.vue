@@ -31,6 +31,8 @@ export default {
       global_emotion_selected: false,
       global_prompt: "",
       global_prompt_selected: false,
+      global_prompt_weight: 0.7,
+      global_prompt_weight_selected: false,
       global_use_reference_audio: false,
       global_speaker: "",
       global_speaker_selected: false,
@@ -106,6 +108,7 @@ export default {
                 language: data[model_id]["language"],
                 emotion: 0,
                 prompt: "",
+                prompt_weight: 0.7,
                 selected: false,
                 audio: {
                   loading: false,
@@ -153,10 +156,12 @@ export default {
         language: model.language,
         auto_translate: this.auto_translate,
         auto_split: auto_split,
-        emotion: model.version === "2.1" ? model.emotion : model.prompt
+        emotion: model.version === "2.1" ? model.emotion : model.prompt,
+        style_weight: model.prompt_weight
       }
       let formData = new FormData()
       formData.append("text", texts)
+      formData.append("style_text", model.prompt)
       // 仅当使用参考音频且音频有效时生效
       if (this.global_use_reference_audio && this.random_audio.valid && this.random_audio.audio_file !== null) {
         formData.append("reference_audio", this.random_audio.audio_file)
@@ -246,6 +251,7 @@ export default {
         this.global_length_selected = true
         this.global_emotion_selected = true
         this.global_prompt_selected = true
+        this.global_prompt_weight_selected = true
         this.global_speaker_selected = true
         this.global_language_selected = true
       } else {
@@ -258,6 +264,7 @@ export default {
         this.global_length_selected = false
         this.global_emotion_selected = false
         this.global_prompt_selected = false
+        this.global_prompt_weight_selected = false
         this.global_speaker_selected = false
         this.global_language_selected = false
       }
@@ -320,6 +327,9 @@ export default {
           }
           if (this.global_prompt_selected === true) {
             model.prompt = this.global_prompt
+          }
+          if (this.global_prompt_weight_selected === true) {
+            model.prompt_weight = this.global_prompt_weight
           }
           if (this.global_speaker_selected === true) {
             if (model.speakers.includes(this.global_speaker)) {
@@ -504,6 +514,24 @@ export default {
                     style="margin-left: 16px"
                 />
               </a-col>
+
+              <a-col :span="3">
+                <a-checkbox v-model:checked="global_prompt_weight_selected">promptw</a-checkbox>
+              </a-col>
+              <a-col :span="16">
+                <a-slider v-model:value="global_prompt_weight" :min="0" :max="1" :step="0.1"/>
+              </a-col>
+              <a-col :span="5">
+                <a-input-number
+                    v-model:value="global_prompt_weight"
+                    :min="0"
+                    :max="1"
+                    :step="0.1"
+                    style="margin-left: 16px"
+                />
+              </a-col>
+
+
               <a-divider/>
               <a-col :span="3">
                 <a-checkbox v-model:checked="global_prompt_selected">prompt</a-checkbox>
@@ -541,6 +569,8 @@ export default {
                       <a-select-option value="ZH"></a-select-option>
                       <a-select-option value="JP"></a-select-option>
                       <a-select-option value="EN"></a-select-option>
+                      <a-select-option value="MIX"></a-select-option>
+                      <a-select-option value="AUTO"></a-select-option>
                     </a-select>
                   </a-space>
                 </a-space>
