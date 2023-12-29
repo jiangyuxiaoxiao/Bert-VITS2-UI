@@ -176,7 +176,7 @@ export default {
           <a-col :span="24"></a-col>
           <h4 :style="{width: '4em'}">prompt</h4>
           <a-col :span="20">
-            <a-input v-model:value="model.prompt" :min="0" :max="9" :step="1" placeholder="" :disabled="model.version !== '2.3' || model.version !== '2.2'"/>
+            <a-input v-model:value="model.prompt" :min="0" :max="9" :step="1" placeholder="" :disabled="model.version !== '2.3' && model.version !== '2.2'"/>
           </a-col>
 
         </a-row>
