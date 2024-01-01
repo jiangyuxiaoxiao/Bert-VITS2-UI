@@ -95,3 +95,7 @@ BertVits2的前端界面
 + 音频下载，默认命名为`文本@模型名.wav`
 + 侧栏收缩，对于低分辨率更为友好的界面
 + 加载提示
+
+
+## Reference
+[Bert-VITS2](https://github.com/fishaudio/Bert-VITS2)
