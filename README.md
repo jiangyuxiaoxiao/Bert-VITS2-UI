@@ -24,6 +24,7 @@ BertVits2的前端界面
 ![img.png](docs/preview2.png)
 
 ## 特点
++ 推理界面兼容多版本模型
 + 动态加载、卸载模型：更换模型无需重启。
 + 同时加载、推理多个模型：便于对比多个模型的语音效果。
 + 支持同一个模型重复加载：便于对比相同模型的不同参数对生成效果的影响。
@@ -31,16 +32,11 @@ BertVits2的前端界面
 
 ## 使用方法
 + **请以Release中对应的README.MD为准**
-+ 下载Release，并将Release中的`Web`文件夹添加至BertVits2项目根目录
-+ 配置`BertVits2`中的`config.yml`中的`server`配置
-+ 运行`BertVits2`中的`server_fastapi.py`
-
-
-## `BertVits2`版本说明
-+ 对应版本`2.2` [release](https://github.com/fishaudio/Bert-VITS2/releases/tag/v2.2)
-+ 请将本项目的`release`包解压后复制到`Bert-Vits2`项目根目录并替换所有文件，或者直接拉取[459635 commit](https://github.com/fishaudio/Bert-VITS2/commit/45963d595eb57953a5f6676817d5fb00328d5223)
-
 + 由于没有权限鉴定，请勿将网页服务对外开放。
+
+#### ver 0.8.0 更新
++ 支持2.3模型推理
++ 支持`fix` `auto`功能
 
 #### ver 0.7.0 更新
 + 匹配新版本后端接口
